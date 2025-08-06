@@ -33,8 +33,12 @@
                     <input type="email" name="email" class="form-control" placeholder="E-mail" required />
                 </div>
                 <div class="mb-3">
-                    <input type="password" name="senha" class="form-control" placeholder="Senha" required />
+                    <input type="email" name="email" class="form-control" placeholder="E-mail" required />
                 </div>
+
+                <!-- Div para mostrar o erro do e-mail -->
+                <div id="erro-mensagem" class="alert alert-danger" style="display:none;" role="alert"></div>
+
                 <div class="mb-3">
                     <input type="password" name="confirmar_senha" class="form-control" placeholder="Confirmar senha"
                         required />
@@ -52,14 +56,7 @@
                     <button type="submit" class="btn btn-danger fw-bold">Cadastrar</button>
                 </div>
 
-                <!-- <div class="d-grid btn-google">
-                    <button id="btnGoogle" type="button"
-                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2">
-                        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" width="20"
-                            height="20" />
-                        Entrar com Google
-                    </button>
-                </div> -->
+                <div id="erro-mensagem" class="text-danger small mt-3"></div>
 
                 <div class="text-center my-3 text-muted">ou</div>
                 <div class="d-grid mb-3">
@@ -67,11 +64,19 @@
                 </div>
             </form>
 
+            <!-- Mensagem de sucesso -->
+            <div id="mensagem-sucesso" class="alert alert-success text-center" style="display:none;">
+                Cadastro realizado com sucesso! Redirecionando...
+            </div>
 
+            <!-- Barra de Carregamento -->
+            <div id="barra-carregamento" class="progress" style="height: 5px; display:none;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%;"></div>
+            </div>
         </div>
     </div>
-    <script src="../public/js/cadastro.js" defer></script>
 
+    <script src="../public/js/cadastro.js" defer></script>
 </body>
 
 </html>

@@ -1,17 +1,12 @@
 <?php
 header('Content-Type: application/json');
-require_once '../config/database.php';
+require_once '../config/database.php';  // Inclui a classe Database
 
-// Lê o corpo da requisição
+// Lê os dados enviados no corpo da requisição
 $input = json_decode(file_get_contents('php://input'), true);
 
-// Verifica se os campos estão presentes
-if (
-    !isset($input['nome']) ||
-    !isset($input['sobrenome']) ||
-    !isset($input['email']) ||
-    !isset($input['senha'])
-) {
+// Verifica se os campos obrigatórios estão presentes
+if (!isset($input['nome']) || !isset($input['sobrenome']) || !isset($input['email']) || !isset($input['senha'])) {
     echo json_encode(['status' => 'erro', 'mensagem' => 'Dados incompletos.']);
     exit;
 }
@@ -22,7 +17,6 @@ $email = trim($input['email']);
 $senha = $input['senha'];
 
 // Validações básicas
-// Validações básicas
 if (empty($nome) || empty($sobrenome) || empty($email) || empty($senha)) {
     echo json_encode(['status' => 'erro', 'mensagem' => 'Preencha todos os campos.']);
     exit;
@@ -30,29 +24,26 @@ if (empty($nome) || empty($sobrenome) || empty($email) || empty($senha)) {
 
 // Validação de senha
 $erros = [];
-
-if (strlen($senha) < 8) {
-    $erros[] = "Mínimo de 8 caracteres";
+if (strlen($senha) < 6) {
+    $erros[] = "A senha precisa ter pelo menos 6 caracteres.";
 }
 if (!preg_match('/[0-9]/', $senha)) {
-    $erros[] = "Pelo menos 1 número";
+    $erros[] = "A senha precisa ter pelo menos 1 número.";
 }
 if (!preg_match('/[a-z]/', $senha) || !preg_match('/[A-Z]/', $senha)) {
-    $erros[] = "Pelo menos 1 letra maiúscula e 1 minúscula";
+    $erros[] = "A senha precisa ter pelo menos 1 letra maiúscula e 1 minúscula.";
 }
 if (!preg_match('/[\W_]/', $senha)) {
-    $erros[] = "Pelo menos 1 caractere especial (ex: @, #, !)";
+    $erros[] = "A senha precisa ter pelo menos 1 caractere especial (ex: @, #, !).";
 }
 
 if (!empty($erros)) {
-    echo json_encode([
-        'status' => 'erro',
-        'mensagem' => implode("<br>", $erros)
-    ]);
+    echo json_encode(['status' => 'erro', 'mensagem' => $erros]);
     exit;
 }
 
 try {
+    // Conectar ao banco de dados
     $db = new Database();
     $conn = $db->conectar();
 
@@ -60,6 +51,7 @@ try {
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ?");
     $stmt->execute([$email]);
 
+    // Se o e-mail já existir, retorna um erro
     if ($stmt->rowCount() > 0) {
         echo json_encode(['status' => 'erro', 'mensagem' => 'Este e-mail já está em uso.']);
         exit;
@@ -68,11 +60,13 @@ try {
     // Criptografa a senha
     $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-    // Insere o novo usuário
+    // Insere o novo usuário no banco de dados
     $stmt = $conn->prepare("INSERT INTO usuarios (nome, sobrenome, email, senha) VALUES (?, ?, ?, ?)");
     $stmt->execute([$nome, $sobrenome, $email, $senhaHash]);
 
-    echo json_encode(['status' => 'ok']);
+    // Resposta de sucesso
+    echo json_encode(['status' => 'ok', 'mensagem' => 'Usuário cadastrado com sucesso']);
 } catch (PDOException $e) {
+    // Erro de conexão ou execução
     echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao cadastrar: ' . $e->getMessage()]);
 }
